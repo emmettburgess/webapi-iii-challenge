@@ -1,5 +1,9 @@
-onst server = require('./server.js');
+require('dotenv').config();
 
-server.listen(9090, () => {
-    console.log(`server listening on localhost:9090`);
+const server = require('./server.js');
+
+const port = process.env.PORT || 9090;
+
+server.listen(port, () => {
+    console.log(`server listening on localhost:${port}`);
 }); 
