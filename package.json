@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+github.com/emmettburgess/webapi-iii-challenge.git"
+    "url": "git+http://github.com/emmettburgess/webapi-iii-challenge.git"
   },
   "keywords": [
     "node",
