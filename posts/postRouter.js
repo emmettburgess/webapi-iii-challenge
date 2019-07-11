@@ -1,82 +1,60 @@
 const express = require('express');
-const Posts = require('./postDb.js');
 
 const router = express.Router();
 
-router.use(express.json());
+const db = require('./postDb');
 
-router.get('/', (req, res) => {
-    Posts.get()
-        .then(posts => {
-            res.status(200).json(posts);
-        })
-        .catch(err => {
-            err = { error: "The posts information could not be retrieved" };
-            res.status(500).json(err);
-        })
-
-});
-router.get('/:id', validatePostId, (req, res) => {
-    console.log('POST VALIDATED');
-});
-
-router.delete('/:id', (req, res) => {
-    const { id } = req.params;
-
-    Posts.remove(id)
-        .then(deleted => {
-            if (deleted) {
-                res.status(204).end();
-            } else {
-                res.status(404).json({ message: "The post with the specified ID does not exist" });
-            }
-        })
-        .catch(err => {
-            err = { error: "The post could not be removed" };
-            res.status(500).json(err);
-        })
-});
-
-router.put('/:id', (req, res) => {
-    const { id } = req.params;
-    const changes = req.body;
-
-    if (!id) {
-        res.status(404).json({ message: "The post with the specified ID does not exist" });
-    } else if (!changes.text) {
-        res.status(400).json({ message: "missing required text field" });
-    } else {
-        Posts.update(id, changes)
-            .then(updated => {
-                if (updated) {
-                    res.status(200).json(changes)
-                }
-            })
-            .catch(err => {
-                err = { error: "The post information could not be modified" };
-                req.status(500).json(err);
-            })
+router.get('/', async (req, res) => {
+    try {
+        const posts = await db.get(req.query);
+        res.status(200).json(posts);
+    } catch (error) {
+        res.status(500).json({ message: 'Error retrieving posts'})
     }
 });
 
-// custom middleware
+router.get('/:id', async (req, res) => {
+    try {
+        const post = await db.getById(req.params.id);
+    
+        if (post) {
+            res.status(200).json({ post })
+        } else {
+            res.status(404).json({ message: 'Post not found!' })
+        }
+    } catch (error) { 
+        res.status(500).json({ message: 'Error retrieving post' })
+    }
+    });
 
-function validatePostId(req, res, next) {
-    const { id } = req.params;
-    Posts.getById(id)
-        .then(post => {
-            if (post) {
-                res.status(200).json(post)
+    router.delete('/:id', async (req, res) => {
+        try {
+            const count = await db.remove(req.params.id);
+            if (count > 0) {
+                res.status(200).json({ message: 'Deleted!' })
             } else {
-                res.status(404).json({ message: "The post with the specified ID does not exist" });
+                res.status(404).json({ message: 'Unable to be deleted!' })
             }
-        })
-        .catch(err => {
-            err = { error: "The post information could not be retrieved" }
-            res.status(500).json(err)
-        })
+        } catch (error) {
+            res.status(500).json({ message: 'Error deleting post!' })
+        }
+        });
 
-    next();
-};
+        router.put('/:id', async (req, res) => {
+            try {
+                const post = await db.update(req.params.id, req.body);
+                if (post) {
+                    res.status(200).json(post)
+                } else {
+                    res.status(404).json({ message: 'Post could not be found!' })
+                }
+            } catch (error) {
+                res.status(500).json({ message: 'Error updating post' })
+            }
+            });
 
-module.exports = router; 
+            function validatePostId(req, res, next) {
+
+            }
+
+            module.exports = router;
