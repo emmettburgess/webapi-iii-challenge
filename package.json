@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/LambdaSchool/Node-Blog.git"
+    "url": "git+github.com/emmettburgess/webapi-iii-challenge.git"
   },
   "keywords": [
     "node",
